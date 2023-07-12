@@ -30,6 +30,24 @@ app.get('/character', async (req, res) => {
   }
 });
 
+app.get('/character/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const getCharacter = await client.get(req.originalUrl);
+    if (getCharacter) {
+      return res.json(JSON.parse(getCharacter));
+    }
+
+    const response = await axios.get(`${URL_API}/${id}`);
+    const character = JSON.stringify(response.data);
+    await client.set(req.originalUrl, character);
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.listen(PORT, async () => {
   await client.connect();
   console.log(`✅ Server on Port ${PORT}`);
